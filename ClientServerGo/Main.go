@@ -16,7 +16,8 @@ func main() {
 		fmt.Println("3) Delete User")
 		fmt.Println("4) Send User")
 		option,_:= reader.ReadString('\n');
-		if (strings.TrimSpace(option)=="1"){
+		switch(strings.TrimSpace(option)){
+		case"1":
 			fmt.Println("Enter Username")
 			userename,_:= reader.ReadString('\n')
 			userename=strings.TrimSpace(userename)
@@ -45,30 +46,58 @@ func main() {
 			}else{
 				fmt.Println("Error User not Added!!!!!!!")
 			}
-		}
-		if (strings.TrimSpace(option)=="2"){
+			break;
+		case "2":
 			fmt.Println("Enter Username")
 			userename,_:= reader.ReadString('\n')
 			userename=strings.TrimSpace(userename)
-			userToAdd:="Show"+"%"+userename+"\n"
-			conn.Write([]byte(userToAdd))
+			userToShow:="Show"+"%"+userename+"\n"
+			conn.Write([]byte(userToShow));
 			message, _ := bufio.NewReader(conn).ReadString('\n')
-			fmt.Println("Message Received:", string(message))
-			if(strings.TrimSpace(string(message))!=" "){
+			if(strings.TrimSpace(string(message))!="No"){
 				userinfo:=strings.Split(message,",")
-
+				println("----Contact Info------ ")
+				println("Username : "+userinfo[0])
+				println("Name : "+userinfo[1])
+				println("Email : "+userinfo[2])
+				println("Identity Card : "+userinfo[3])
+				println("Birth Date  : "+userinfo[4])
 			}else{
 				fmt.Println("Error User not in database!!!!!")
 			}
-		}
-		if (strings.TrimSpace(option)=="3"){
-
-		}
-		if (strings.TrimSpace(option)=="4"){
-
-		}
-		if (strings.TrimSpace(option)=="5"){
+			break;
+		case "3":
+			fmt.Println("Enter Username")
+			userename,_:= reader.ReadString('\n')
+			userename=strings.TrimSpace(userename)
+			userToDelete:="Delete"+"%"+userename+"\n"
+			conn.Write([]byte(userToDelete))
+			message, _ := bufio.NewReader(conn).ReadString('\n')
+			if(strings.TrimSpace(string(message))=="Yes") {
+				fmt.Println("User Succesfully Deleted")
+			}else{
+				fmt.Println("Error User not deleted!!!!!")
+			}
+			break;
+		case "4":
+			fmt.Println("Enter Username to send")
+			userename,_:= reader.ReadString('\n')
+			userename=strings.TrimSpace(userename)
+			fmt.Println("Enter Email to send")
+			email,_:= reader.ReadString('\n')
+			email=strings.TrimSpace(email)
+			userToSend:="Send"+"%"+userename+"%"+email+"\n"
+			conn.Write([]byte(userToSend))
+			message, _ := bufio.NewReader(conn).ReadString('\n')
+			if(strings.TrimSpace(string(message))=="Yes") {
+				fmt.Println("User Succesfully Sent!!!!!")
+			}else{
+				fmt.Println("Email not sent !!!!!")
+			}
+			break;
+		case "5":
 			os.Exit(1);
+			break;
 		}
 	}
 }

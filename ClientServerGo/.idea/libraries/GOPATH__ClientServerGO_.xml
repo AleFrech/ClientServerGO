@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;ClientServerGO&gt;">
+    <CLASSES>
+      <root url="file://C:/GoProjects/src/github.com" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <excluded>
+      <root url="file://C:/GoProjects/src/github.com/mbanzon/simplehttp/.git" />
+      <root url="file://$PROJECT_DIR$" />
+      <root url="file://C:/GoProjects/src/github.com/mailgun/mailgun-go/.git" />
+    </excluded>
+  </library>
+</component>

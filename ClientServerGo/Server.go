@@ -6,12 +6,12 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"github.com/mailgun/mailgun-go"
 )
 
-var conn *net.TCPConn
+
 
 func main() {
-
 	ln, _ := net.Listen("tcp", ":8080")
 	conn, _ := ln.Accept()
 	for true {
@@ -36,9 +36,39 @@ func main() {
 			}
 			conn.Write([]byte(res+"\n"))
 		}
+		if(tokens[0]=="Show"){
+			res:=search(tokens[1])
+			conn.Write([]byte(res+"\n"))
+		}
+		if(tokens[0]=="Delete"){
+			users:=getUsers();
+			userlist:= strings.Split(users,";")
+			reWriteFile();
+			res:="No";
+			for i:=0;i<len(userlist);i++{
+				tok:=strings.Split(userlist[i],",");
+				if(strings.TrimSpace(tok[0])!=strings.TrimSpace(tokens[1])){
+					writeFile(userlist[i]);
+				}else{
+					res="Yes"
+				}
+			}
+			conn.Write([]byte(res+"\n"))
+
+		}
+		if(tokens[0]=="Send"){
+			//userinfo:= search(tokens[1])
+			gun := mailgun.NewMailgun("sandbox001786de44a44eec898cd90610e9097d.mailgun.org", "key-410b4bd9be9ab2241c624fd0a6bd35bf ", "pubkey-ab89ca5403f09e9b41644aba6ee6982b")
+			m := mailgun.NewMessage("Sender ClientServe@info.com", "Contact Info", "Message Body", "Recipient "+strings.TrimSpace(tokens[2]))
+			response, id, err := gun.Send(m)
+			if(err!=nil){
+				fmt.Println(err.Error())
+			}
+			fmt.Printf("Response ID: %s\n", id)
+			fmt.Printf("Message from server: %s\n", response)
+		}
 	}
 }
-
 
 func verifyEmail(email string) bool{
 	re:=regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
@@ -76,24 +106,29 @@ func verifyUser(user string) bool{
 }
 
 
-
 func writeFile(user string) bool {
 	f, err := os.OpenFile("Data.txt", os.O_APPEND ,0666)
-	f.WriteString(user+"\n")
+	f.WriteString(user+";")
 	if(err!=nil) {
 		fmt.Println(err.Error())
 		return false;
 	}
+	f.Close();
 	return true;
 }
 
 func reWriteFile() bool {
-	f, err := os.OpenFile("Data.txt", os.O_TRUNC, 0666)
-	f.WriteString(" ")
+	err := os.Remove("Data.txt")
 	if(err!=nil) {
 		fmt.Println(err.Error())
 		return false;
 	}
+	f,err1:=os.Create("Data.txt");
+	if(err1!=nil) {
+		fmt.Println(err1.Error())
+		return false;
+	}
+	f.Close();
 	return true;
 }
 
@@ -109,25 +144,27 @@ func getUsers() string{
 		fmt.Println(err2.Error())
 		return " ";
 	}
+	f.Close();
 	return string(data)
 }
 
 
 func search(username string) string{
 	users:=getUsers()
-	userlist:=strings.Split(users,"\n")
+	fmt.Println(users)
+	userlist:=strings.Split(users,";")
 	for i:=0;i<len(userlist);i++{
-		userinfo:=strings.Split(userlist[i],",")
-		if(userinfo[0]==username){
+		userinfo:=strings.Split(strings.TrimSpace(userlist[i]),",")
+		if(userinfo[0]==strings.TrimSpace(username)){
 			return userlist[i]
 		}
 	}
-	return " "
+	return "No"
 }
 
 func isUnique(str string,pos int) bool{
 	users:=getUsers()
-	userlist:=strings.Split(users,"\n")
+	userlist:=strings.Split(users,";")
 	if(len(userlist)<=1) {
 		return true
 	}
@@ -143,4 +180,3 @@ func isUnique(str string,pos int) bool{
 	}
 	return true;
 }
-
